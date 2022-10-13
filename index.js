@@ -1,74 +1,90 @@
-const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
-const uri = "mongodb+srv://admin:root@cluster0.sl2ee.mongodb.net/?retryWrites=true&w=majority";
-const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
+// get the client
+const mysql = require('mysql2');
+
+// create the connection to database
+const connection = mysql.createConnection({
+    host: '127.0.0.1',
+    user: 'root',
+    database: 'sql_store'
+});
+
+const invi_con = mysql.createConnection({
+    host: '127.0.0.1',
+    user: 'root',
+    database: 'sql_inventory'
+});
+
+// simple query
+// connection.query('SELECT * FROM `customers` LIMIT 3', response);
+
+// callback function to handle the query result
+function response(err, results, fields) {
+    if (err) console.log(err);
+    console.log(results); // results contains rows returned by server
+}
 
 
-async function retrieveData() {
+
+// read all customers Promise Based
+async function readAllCustomersPromise() {
     try {
-        await client.connect();
-        console.log("Connected correctly to server");
-        const db = client.db("wedeliber-strapi");
-        const collection = db.collection("products");
-        // const query = { username: "admin" };
-        const carts = await collection.find().toArray();
-        console.log(carts);
-    } catch (err) {
-        console.log(err.stack);
+        const [rows, fields] = await connection.promise().query('SELECT * FROM `customers`');
+        console.log(rows);
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+// update customer Promise Based
+async function updateCustomerPromise() {
+    try {
+        const [rows, fields] = await connection.promise().query('UPDATE `customers` SET `first_name` = ?, `last_name` = ? WHERE `customer_id` = ?', ['John Doe', 'Salape', 1]);
+        console.log(rows);
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+// insert customer Promise Based
+async function insertCustomerPromise() {
+    try {
+        const [rows, fields] = await connection.promise().query('INSERT INTO `customers` (`first_name`, `last_name`, `address`, `city`, `state`, `points`) VALUES (?, ?, ?, ?, ?, ?)', ['Jet', 'Salape', '123 Main St', 'New York', 'NY', 100]);
+        console.log(rows);
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+// delete customer Promise Based
+async function deleteCustomerPromise() {
+    try {
+        const [rows, fields] = await connection.promise().query('DELETE FROM `customers` WHERE `customer_id` = ?', [12]);
+        console.log(rows);
+    } catch (error) {
+        console.log(error);
     }
 }
 
 
 
-async function insertData() {
-    try {
-        await client.connect();
-        console.log("Connected correctly to server");
-        const db = client.db("wedeliber-strapi");
-        const collection = db.collection("products");
-        const query = {
-            name: "Mango Graham Shake",
-            description: "Mango Graham Shake is a delicious and refreshing drink that is perfect for the summer season. It is made with fresh mangoes, milk, and graham crackers. It is a great way to cool down on a hot day.",
-        };
-        const carts = await collection.insertOne(query);
-        console.log(carts);
-
-    } catch (err) {
-        console.log(err.stack);
-    }
+// read all customers Callback Based
+function readAllCustomersCallback() {
+    connection.query('SELECT * FROM `customers`', response);
 }
 
-
-async function updateDate() {
-    try {
-        await client.connect();
-        console.log("Connected correctly to server");
-        const db = client.db("wedeliber-strapi");
-        const collection = db.collection("products");
-        const query = { _id: ObjectId("634793a116759cc02d43a2d8") };
-        const update = { $set: { name: "Mango Graham Shake with Yalukt 2" } };
-        const carts = await collection.updateOne(query, update);
-        console.log(carts);
-
-    } catch (err) {
-        console.log(err.stack);
-    }
+// update customer Callback Based
+function updateCustomerCallback() {
+    connection.query('UPDATE `customers` SET `first_name` = ?, `last_name` = ? WHERE `customer_id` = ?', ['John Doe', 'Salape', 13], response);
 }
 
-
-
-async function deleteData() {
-    try {
-        await client.connect();
-        console.log("Connected correctly to server");
-        const db = client.db("wedeliber-strapi");
-        const collection = db.collection("products");
-        const query = { _id: ObjectId("634793a116759cc02d43a2d8") };
-        const carts = await collection.deleteOne(query);
-        console.log(carts);
-
-    } catch (err) {
-        console.log(err.stack);
-    }
+// insert customer Callback Based
+function insertCustomerCallback() {
+    connection.query('INSERT INTO `customers` (`first_name`, `last_name`, `address`, `city`, `state`, `points`) VALUES (?, ?, ?, ?, ?, ?)', ['Jet', 'Salape', '123 Main St', 'New York', 'NY', 100], response);
 }
 
-retrieveData();
+// delete customer Callback Based
+function deleteCustomerCallback() {
+    connection.query('DELETE FROM `customers` WHERE `customer_id` = ?', [19], response);
+}
+readAllCustomersCallback();
+
